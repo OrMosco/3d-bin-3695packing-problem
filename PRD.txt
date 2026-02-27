@@ -1,0 +1,371 @@
+# Product Requirements Document (PRD)
+# 3D Bin Packing Visualizer - MVP
+
+---
+
+## 1. Overview
+
+**Project:** 3D Bin Packing Visualizer  
+**Scope:** 3-Hour Technical Assignment  
+**Date:** February 27, 2026
+
+### 1.1 Description
+A minimal web application that solves the 3D bin packing problem using two algorithms (First Fit Decreasing and Best Fit) and visualizes the results in an interactive 3D view.
+
+### 1.2 Core Objective
+Pack rectangular items into a single bin, compare FFD vs Best Fit algorithm efficiency, and display results in 3D.
+
+---
+
+## 2. Scope & Constraints
+
+### 2.1 Time Budget: 3 Hours
+
+| Task | Time |
+|------|------|
+| Backend setup + algorithms | 1.5 hours |
+| Frontend + 3D visualization | 1 hour |
+| Integration + testing | 30 minutes |
+
+### 2.2 In Scope
+- Single bin packing
+- Two algorithms: FFD and Best Fit
+- Basic item input (dimensions only)
+- 3D visualization with orbit controls
+- Space utilization display
+
+### 2.3 Out of Scope
+- User authentication
+- Database persistence
+- Multiple bins
+- Weight constraints
+- Item rotation options
+- Manual drag-and-drop
+- Export functionality
+- AI/ML features
+
+---
+
+## 3. Technical Stack
+
+### 3.1 Architecture
+
+```
++-------------------------------------+
+|     FRONTEND (React + Three.js)     |
+|  +-----------+  +----------------+  |
+|  |  UI Form  |  | 3D Viewport    |  |
+|  |  (React)  |  | (Three.js/R3F) |  |
+|  +-----------+  +----------------+  |
++-------------------------------------+
+                 | REST API
++-------------------------------------+
+|        BACKEND (Python FastAPI)     |
+|  +-----------+  +----------------+  |
+|  |  FastAPI  |  | FFD + Best Fit |  |
+|  |  Server   |  | Algorithms     |  |
+|  +-----------+  +----------------+  |
++-------------------------------------+
+```
+
+### 3.2 Technology Choices
+
+**Frontend:**
+- React 18 (Vite)
+- Three.js + React Three Fiber
+- Basic CSS (no framework needed)
+- Fetch API for HTTP
+
+**Backend:**
+- Python 3.11+
+- FastAPI
+- Pydantic for validation
+- No database (in-memory only)
+
+---
+
+## 4. Functional Requirements
+
+### 4.1 Item Input (MVP)
+| ID | Requirement |
+|----|-------------|
+| F1 | Add items with width, height, depth (numbers) |
+| F2 | Add multiple items to a list |
+| F3 | Remove items from list |
+| F4 | Auto-generate random color per item |
+
+### 4.2 Bin Configuration (MVP)
+| ID | Requirement |
+|----|-------------|
+| F5 | Set bin dimensions (W x H x D) |
+| F6 | Default bin size: 10 x 10 x 10 |
+
+### 4.3 Packing Algorithms (MVP)
+| ID | Requirement |
+|----|-------------|
+| F7 | First Fit Decreasing (FFD) algorithm |
+| F8 | Best Fit algorithm |
+| F9 | Algorithm selector dropdown |
+| F10 | Compare results between algorithms |
+
+### 4.4 3D Visualization (MVP)
+| ID | Requirement |
+|----|-------------|
+| F11 | Render bin as wireframe box |
+| F12 | Render packed items as colored boxes |
+| F13 | Orbit controls (rotate, zoom, pan) |
+| F14 | Show bin boundaries clearly |
+
+### 4.5 Results Display (MVP)
+| ID | Requirement |
+|----|-------------|
+| F15 | Show space utilization percentage |
+| F16 | Show number of items packed vs total |
+| F17 | List unpacked items (if any) |
+
+---
+
+## 5. Algorithms
+
+### 5.1 First Fit Decreasing (FFD)
+```
+1. Sort items by volume (largest first)
+2. For each item:
+   a. Find the first position where item fits
+   b. Place item at that position
+   c. Update available space
+3. Return packed items with positions
+```
+
+**Placement Strategy:**
+- Scan positions along X, then Y, then Z
+- Check collision with existing items
+- Place at first valid position found
+
+### 5.2 Best Fit
+```
+1. Sort items by volume (largest first)
+2. For each item:
+   a. Evaluate ALL possible positions
+   b. Score each position (minimize wasted space)
+   c. Place item at best-scored position
+3. Return packed items with positions
+```
+
+**Scoring:**
+- Lower score = better fit
+- Score based on remaining gaps created
+
+---
+
+## 6. API Specification
+
+### 6.1 Single Endpoint
+
+```
+POST /api/pack
+```
+
+**Request:**
+```json
+{
+  "bin": {
+    "width": 10,
+    "height": 10,
+    "depth": 10
+  },
+  "items": [
+    { "id": "1", "width": 3, "height": 2, "depth": 4 },
+    { "id": "2", "width": 2, "height": 2, "depth": 2 }
+  ],
+  "algorithm": "ffd" | "best_fit"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "algorithm": "ffd",
+  "utilization": 68.5,
+  "packedItems": [
+    {
+      "id": "1",
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "dimensions": { "width": 3, "height": 2, "depth": 4 },
+      "color": "#4CAF50"
+    }
+  ],
+  "unpackedItems": [],
+  "stats": {
+    "totalItems": 2,
+    "packedCount": 2,
+    "binVolume": 1000,
+    "usedVolume": 685
+  }
+}
+```
+
+---
+
+## 7. User Interface
+
+### 7.1 Layout
+
+```
++----------------------------------------------------------+
+|  3D Bin Packing Visualizer                               |
++-----------------+----------------------------------------+
+|                 |                                        |
+|  BIN CONFIG     |                                        |
+|  W:[10] H:[10]  |                                        |
+|  D:[10]         |        3D VIEWPORT                     |
+|                 |        (Three.js)                      |
+|  -------------  |                                        |
+|  ADD ITEM       |                                        |
+|  W:[__] H:[__]  |                                        |
+|  D:[__]         |                                        |
+|  [Add Item]     |                                        |
+|                 |                                        |
+|  -------------  |----------------------------------------|
+|  ITEMS LIST     |  RESULTS                               |
+|  - Item 1 (3x2x4)|  Algorithm: [FFD v]                   |
+|  - Item 2 (2x2x2)|  Utilization: 68.5%                   |
+|                 |  Packed: 2/2 items                     |
+|  -------------  |                                        |
+|  [PACK]         |                                        |
++-----------------+----------------------------------------+
+```
+
+### 7.2 Components
+
+1. **Bin Config Panel** - Three number inputs for dimensions
+2. **Item Form** - Three number inputs + Add button
+3. **Items List** - Scrollable list with delete buttons
+4. **Algorithm Selector** - Dropdown (FFD / Best Fit)
+5. **Pack Button** - Triggers API call
+6. **3D Viewport** - Three.js canvas with OrbitControls
+7. **Results Panel** - Utilization %, item counts
+
+### 7.3 UI/UX Design Guidelines 🎨
+
+#### Visual Style
+- **Modern gradient theme** with dark pink/magenta hues as primary colors
+- **Nice typography** - Clean, readable fonts (e.g., Inter, Poppins)
+- **Emoji integration** throughout UI for visual appeal 📦 ✨ 🎯
+- **Smooth hover effects** on all interactive elements (buttons, cards, inputs)
+- **Subtle animations** for state changes and transitions
+
+#### Color Palette
+```
+Primary Gradient:  #E91E63 → #9C27B0 (Pink to Purple)
+Background Dark:   #1a1a2e / #16213e
+Background Light:  #f8f9fa / #ffffff
+Accent:            #ff6b9d (bright pink)
+Success:           #4CAF50
+Text Dark Mode:    #ffffff / #e0e0e0
+Text Light Mode:   #1a1a2e / #333333
+```
+
+#### Header & Navigation
+- Sticky header with app logo/title
+- Dark mode / Light mode toggle switch 🌙 ☀️
+- Clean navigation links
+- Gradient accent border or underline
+
+#### Footer
+- Copyright information: © 2026 3D Bin Packing Visualizer
+- Links: About | GitHub | Documentation
+- Subtle gradient or border accent
+
+#### Responsive Design 📱
+- **Desktop-first** with mobile-friendly breakpoints
+- Sidebar collapses to bottom on mobile
+- 3D viewport scales appropriately
+- Touch-friendly controls on mobile
+
+#### Dark Mode / Light Mode 🌓
+- System preference detection
+- Manual toggle switch in header
+- Smooth transition between modes
+- All components must support both themes
+
+#### Key Features Highlight
+- Use cards with subtle shadows and gradients
+- Feature badges/pills for algorithm names
+- Progress indicators with gradient fills
+- Results displayed prominently with icons
+
+---
+
+## 8. File Structure
+
+```
+project/
+|-- backend/
+|   |-- main.py              # FastAPI app
+|   |-- algorithms/
+|   |   |-- __init__.py
+|   |   |-- ffd.py           # First Fit Decreasing
+|   |   +-- best_fit.py      # Best Fit algorithm
+|   |-- models.py            # Pydantic schemas
+|   +-- requirements.txt
+|
+|-- frontend/
+|   |-- src/
+|   |   |-- App.jsx          # Main component
+|   |   |-- components/
+|   |   |   |-- BinConfig.jsx
+|   |   |   |-- ItemForm.jsx
+|   |   |   |-- ItemList.jsx
+|   |   |   |-- Viewport3D.jsx
+|   |   |   +-- Results.jsx
+|   |   |-- App.css
+|   |   +-- main.jsx
+|   |-- package.json
+|   +-- vite.config.js
+|
++-- README.md
+```
+
+---
+
+## 9. Acceptance Criteria
+
+### Must Have (for 3-hour delivery)
+- [ ] Backend runs and responds to /api/pack
+- [ ] FFD algorithm packs items without overlap
+- [ ] Best Fit algorithm packs items without overlap
+- [ ] Frontend displays 3D bin with packed items
+- [ ] User can add items and set bin size
+- [ ] User can switch between algorithms
+- [ ] Space utilization is calculated and displayed
+
+### Nice to Have (if time permits)
+- [ ] Different colors per item
+- [ ] Show unpacked items list
+- [ ] Basic error handling
+- [ ] Loading state during packing
+
+---
+
+## 10. Quick Start Commands
+
+**Backend:**
+```bash
+cd backend
+pip install fastapi uvicorn pydantic
+uvicorn main:app --reload --port 8000
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm create vite@latest . -- --template react
+npm install three @react-three/fiber @react-three/drei
+npm run dev
+```
+
+---
+
+*End of Document*
