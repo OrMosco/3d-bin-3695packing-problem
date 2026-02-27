@@ -6,6 +6,7 @@ import ItemList from './components/ItemList'
 import AlgorithmSelector from './components/AlgorithmSelector'
 import Viewport3D from './components/Viewport3D'
 import Results from './components/Results'
+import { packItems } from './lib/binPacking'
 
 function App() {
   // Theme state
@@ -51,34 +52,24 @@ function App() {
     setItems(prev => prev.filter(item => item.id !== id))
   }
 
-  const handlePack = async () => {
+  const handlePack = () => {
     if (items.length === 0) return
     
     setLoading(true)
     
     try {
-      const response = await fetch('/api/pack', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          bin,
-          items: items.map(item => ({
-            id: item.id,
-            width: item.width,
-            height: item.height,
-            depth: item.depth
-          })),
-          algorithm
-        })
-      })
+      // Run packing algorithm locally (no backend needed)
+      const data = packItems(
+        bin,
+        items.map(item => ({
+          id: item.id,
+          width: item.width,
+          height: item.height,
+          depth: item.depth
+        })),
+        algorithm
+      )
       
-      if (!response.ok) {
-        throw new Error('Packing failed')
-      }
-      
-      const data = await response.json()
       setResults(data)
       
       // Merge colors from original items
@@ -93,7 +84,7 @@ function App() {
       
     } catch (error) {
       console.error('Error packing:', error)
-      alert('Failed to pack items. Make sure the backend is running.')
+      alert('Failed to pack items: ' + error.message)
     } finally {
       setLoading(false)
     }
