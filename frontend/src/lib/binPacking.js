@@ -355,12 +355,13 @@ export function packItems(bin, items, algorithm) {
   return {
     packedItems: result.packedItems,
     unpackedItems: result.unpackedIds,
+    utilization: Math.round(utilization * 100) / 100,
     stats: {
       totalItems: items.length,
       packedCount: result.packedItems.length,
       unpackedCount: result.unpackedIds.length,
       binVolume,
-      packedVolume,
+      usedVolume: packedVolume,
       utilization: Math.round(utilization * 100) / 100
     }
   };

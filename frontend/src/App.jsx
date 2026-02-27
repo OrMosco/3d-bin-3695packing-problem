@@ -70,7 +70,7 @@ function App() {
         algorithm
       )
       
-      setResults(data)
+      setResults({ ...data, algorithm })
       
       // Merge colors from original items
       const packedWithColors = data.packedItems.map(packed => {
