@@ -84,7 +84,7 @@ function App() {
       
     } catch (error) {
       console.error('Error packing:', error)
-      alert('Failed to pack items: ' + error.message)
+      alert('Packing error: ' + (error.message || 'Unknown error'))
     } finally {
       setLoading(false)
     }
