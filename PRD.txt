@@ -50,15 +50,19 @@ Pack rectangular items into a single bin, compare FFD vs Best Fit algorithm effi
 
 ### 3.1 Architecture
 
+The packing algorithms are implemented in pure JavaScript and run **client-side** in the browser. The Python/FastAPI backend is a standalone optional service.
+
 ```
-+-------------------------------------+
-|     FRONTEND (React + Three.js)     |
-|  +-----------+  +----------------+  |
-|  |  UI Form  |  | 3D Viewport    |  |
-|  |  (React)  |  | (Three.js/R3F) |  |
-|  +-----------+  +----------------+  |
-+-------------------------------------+
-                 | REST API
++----------------------------------------------------------+
+|                FRONTEND (React + Three.js)               |
+|  +-----------+  +----------------+  +-----------------+  |
+|  |  UI Form  |  | 3D Viewport    |  | Packing Algos   |  |
+|  |  (React)  |  | (Three.js/R3F) |  | (JS, client-    |  |
+|  +-----------+  +----------------+  |  side only)     |  |
+|                                     +-----------------+  |
++----------------------------------------------------------+
+
+Optional standalone backend (not used by the frontend):
 +-------------------------------------+
 |        BACKEND (Python FastAPI)     |
 |  +-----------+  +----------------+  |
@@ -74,9 +78,10 @@ Pack rectangular items into a single bin, compare FFD vs Best Fit algorithm effi
 - React 18 (Vite)
 - Three.js + React Three Fiber
 - Basic CSS (no framework needed)
-- Fetch API for HTTP
+- Packing algorithms in pure JavaScript (`src/lib/binPacking.js`)
+- GitHub Pages deployment (`npm run deploy`)
 
-**Backend:**
+**Backend (optional, standalone):**
 - Python 3.11+
 - FastAPI
 - Pydantic for validation
@@ -93,35 +98,37 @@ Pack rectangular items into a single bin, compare FFD vs Best Fit algorithm effi
 | F2 | Add multiple items to a list |
 | F3 | Remove items from list |
 | F4 | Auto-generate random color per item |
+| F5 | Load sample items with one click (Quick Actions) |
+| F6 | Clear all items and results with one click (Quick Actions) |
 
 ### 4.2 Bin Configuration (MVP)
 | ID | Requirement |
 |----|-------------|
-| F5 | Set bin dimensions (W x H x D) |
-| F6 | Default bin size: 10 x 10 x 10 |
+| F7 | Set bin dimensions (W x H x D) |
+| F8 | Default bin size: 10 x 10 x 10 |
 
 ### 4.3 Packing Algorithms (MVP)
 | ID | Requirement |
 |----|-------------|
-| F7 | First Fit Decreasing (FFD) algorithm |
-| F8 | Best Fit algorithm |
-| F9 | Algorithm selector dropdown |
-| F10 | Compare results between algorithms |
+| F9  | First Fit Decreasing (FFD) algorithm — JavaScript, client-side |
+| F10 | Best Fit algorithm — JavaScript, client-side |
+| F11 | Algorithm selector dropdown |
+| F12 | Compare results between algorithms |
 
 ### 4.4 3D Visualization (MVP)
 | ID | Requirement |
 |----|-------------|
-| F11 | Render bin as wireframe box |
-| F12 | Render packed items as colored boxes |
-| F13 | Orbit controls (rotate, zoom, pan) |
-| F14 | Show bin boundaries clearly |
+| F13 | Render bin as wireframe box |
+| F14 | Render packed items as colored boxes |
+| F15 | Orbit controls (rotate, zoom, pan) |
+| F16 | Show bin boundaries clearly |
 
 ### 4.5 Results Display (MVP)
 | ID | Requirement |
 |----|-------------|
-| F15 | Show space utilization percentage |
-| F16 | Show number of items packed vs total |
-| F17 | List unpacked items (if any) |
+| F17 | Show space utilization percentage |
+| F18 | Show number of items packed vs total |
+| F19 | List unpacked items (if any) |
 
 ---
 
@@ -302,12 +309,12 @@ Text Light Mode:   #1a1a2e / #333333
 
 ```
 project/
-|-- backend/
+|-- backend/                     # Optional standalone REST API
 |   |-- main.py              # FastAPI app
 |   |-- algorithms/
 |   |   |-- __init__.py
-|   |   |-- ffd.py           # First Fit Decreasing
-|   |   +-- best_fit.py      # Best Fit algorithm
+|   |   |-- ffd.py           # First Fit Decreasing (Python)
+|   |   +-- best_fit.py      # Best Fit algorithm (Python)
 |   |-- models.py            # Pydantic schemas
 |   +-- requirements.txt
 |
@@ -319,7 +326,10 @@ project/
 |   |   |   |-- ItemForm.jsx
 |   |   |   |-- ItemList.jsx
 |   |   |   |-- Viewport3D.jsx
-|   |   |   +-- Results.jsx
+|   |   |   |-- Results.jsx
+|   |   |   +-- AlgorithmSelector.jsx
+|   |   |-- lib/
+|   |   |   +-- binPacking.js  # Client-side packing algorithms (JS)
 |   |   |-- App.css
 |   |   +-- main.jsx
 |   |-- package.json
@@ -333,37 +343,44 @@ project/
 ## 9. Acceptance Criteria
 
 ### Must Have (for 3-hour delivery)
-- [ ] Backend runs and responds to /api/pack
-- [ ] FFD algorithm packs items without overlap
-- [ ] Best Fit algorithm packs items without overlap
-- [ ] Frontend displays 3D bin with packed items
-- [ ] User can add items and set bin size
-- [ ] User can switch between algorithms
-- [ ] Space utilization is calculated and displayed
+- [x] Frontend runs packing algorithms client-side (no backend required)
+- [x] FFD algorithm packs items without overlap
+- [x] Best Fit algorithm packs items without overlap
+- [x] Frontend displays 3D bin with packed items
+- [x] User can add items and set bin size
+- [x] User can switch between algorithms
+- [x] Space utilization is calculated and displayed
 
 ### Nice to Have (if time permits)
-- [ ] Different colors per item
-- [ ] Show unpacked items list
-- [ ] Basic error handling
-- [ ] Loading state during packing
+- [x] Different colors per item
+- [x] Show unpacked items list
+- [x] Basic error handling
+- [x] Loading state during packing
+- [x] Quick Actions: load sample items, clear workspace
+- [x] Backend also responds to /api/pack (standalone REST API)
 
 ---
 
 ## 10. Quick Start Commands
 
-**Backend:**
+**Frontend (runs algorithms client-side — no backend needed):**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+**Deploy to GitHub Pages:**
+```bash
+cd frontend
+npm run deploy
+```
+
+**Backend (optional standalone REST API):**
 ```bash
 cd backend
 pip install fastapi uvicorn pydantic
 uvicorn main:app --reload --port 8000
-```
-
-**Frontend:**
-```bash
-cd frontend
-npm create vite@latest . -- --template react
-npm install three @react-three/fiber @react-three/drei
-npm run dev
 ```
 
 ---
