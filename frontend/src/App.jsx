@@ -196,7 +196,7 @@ function App() {
 
       {/* Footer */}
       <footer className="footer">
-        <div>© 2026 3D Bin Packing Visualizer ✨</div>
+        <div>© 2026 3D Bin Packing Visualizer ✨ Created by Or Moscovitz</div>
         <div className="footer-links">
           <a href="#" className="footer-link">About</a>
           <a href="#" className="footer-link">GitHub</a>
