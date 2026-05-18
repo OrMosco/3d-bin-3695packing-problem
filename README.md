@@ -2,6 +2,8 @@
 
 An interactive 3D bin packing visualizer with FFD and Best Fit algorithms — runs entirely in the browser, no backend required.
 
+🌐 **Live Demo**: [https://ormosco.github.io/3d-bin-3695packing-problem/](https://ormosco.github.io/3d-bin-3695packing-problem/)
+
 ![3D Bin Packing](https://img.shields.io/badge/React-18-blue) ![Three.js](https://img.shields.io/badge/Three.js-3D-orange) ![FastAPI](https://img.shields.io/badge/FastAPI-Python-green)
 
 ## ✨ Features
